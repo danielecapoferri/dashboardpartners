@@ -309,13 +309,13 @@ const sameDay = (a,b) => iso(a) === iso(b);
 const SLOTS = ['09:00','09:30','10:00','10:30','11:00','11:30','12:00','12:30','13:00','13:30','15:00','15:30','16:00','16:30'];
 const mins = t => { const [h,m] = t.split(':').map(Number); return h*60+m; };
 
-function firstMonday(){
-  const t = dOnly(new Date()); const wd = t.getDay();
-  if (wd === 6) return addDays(t, 2);
-  if (wd === 0) return addDays(t, 1);
-  return addDays(t, -(wd-1));
+const MAX_PAGE = 3;
+function workingDays(){
+  const out = []; let d = dOnly(new Date());
+  while (out.length < (MAX_PAGE + 1) * 5) { if (d.getDay() !== 0 && d.getDay() !== 6) out.push(new Date(d)); d = addDays(d, 1); }
+  return out;
 }
-function weekDays(i){ const m = addDays(firstMonday(), i*7); return [0,1,2,3,4].map(k => addDays(m,k)); }
+function weekDays(i){ return workingDays().slice(i*5, i*5 + 5); }
 function slotState(day, t){
   const now = new Date();
   if (sameDay(day, now) && mins(t) <= now.getHours()*60 + now.getMinutes()) return 'off';
@@ -469,8 +469,8 @@ function calCard(){
   }
   return `<section class="card" id="cal-card" aria-label="Data e ora">
     <div class="cal-head"><p class="caps14">${rangeLabel(days)}</p>
-      <button type="button" class="chev" data-action="week" data-dir="-1" ${S.week <= 0 ? 'disabled' : ''} aria-label="Settimana precedente">${IC.chevL()}</button>
-      <button type="button" class="chev" data-action="week" data-dir="1" ${S.week >= 2 ? 'disabled' : ''} aria-label="Settimana successiva">${IC.chevR()}</button></div>
+      <button type="button" class="chev" data-action="week" data-dir="-1" ${S.week <= 0 ? 'disabled' : ''} aria-label="Giorni precedenti">${IC.chevL()}</button>
+      <button type="button" class="chev" data-action="week" data-dir="1" ${S.week >= MAX_PAGE ? 'disabled' : ''} aria-label="Giorni successivi">${IC.chevR()}</button></div>
     <div class="days">${dayHtml}</div>
     ${slots}
     ${consentHtml()}
@@ -691,7 +691,7 @@ document.addEventListener('click', e => {
       withLoader(800, () => { S.mode = m; refreshHomeView(); }); break;
     }
     case 'week': {
-      const n = S.week + Number(a.dataset.dir); if (n < 0 || n > 2) break;
+      const n = S.week + Number(a.dataset.dir); if (n < 0 || n > MAX_PAGE) break;
       S.week = n; S.day = null; S.slot = null; refreshCal(); break;
     }
     case 'day': if (a.disabled) break; S.day = a.dataset.d; S.slot = null; refreshCal(); break;
