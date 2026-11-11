@@ -461,7 +461,7 @@ function calCard(){
   }).join('');
   let slots;
   if (!sel) {
-    slots = `<div class="slots-empty">${IC.cal(24)}<p>Seleziona un giorno per vedere gli orari disponibili</p></div>`;
+    slots = `<div class="slots-empty">${IC.cal(24)}<p>Seleziona un giorno per vedere<br>gli orari disponibili</p></div>`;
   } else {
     const grid = SLOTS.map(t => { const off = slotState(sel,t) === 'off'; const on = S.slot === t;
       return `<button type="button" class="slot${on ? ' sel' : ''}" ${off ? 'disabled' : ''} data-action="slot" data-t="${t}" aria-pressed="${on}">${t}</button>`; }).join('');
